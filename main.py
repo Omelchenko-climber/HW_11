@@ -1,6 +1,6 @@
 import re
 
-from classes import AddressBook, Name, Phone, Record
+from classes import AddressBook, Name, Phone, Record, Birthday
 
 
 USERS = AddressBook()
@@ -53,7 +53,17 @@ def delete_phone(user_name: str, user_phones: str) -> str:
     record.delete_number(user_phones)
     return f'Phone number {user_phones} has just been deleted from contact {user_name}.'
 
-def add_birthday(date: str) -> str:
+def add_birthday(name: str, date: str) -> str:
+    if re.match(r"^\d{2}\/\d{2}\/\d{4}$", date):
+        birthday = Birthday(name, date)
+    else: return 'Check your input and try again, please.'
+
+
+def days_to_birthday(name: str) -> None:
+    name = Phone(name)
+    record = Record(name)
+    return record.days_to_birthday()
+
     pass
 
 
@@ -64,8 +74,8 @@ def show_contact(name: str) -> str:
 
 
 @input_error
-def show_all() -> str:
-    USERS.show_contacts()
+def show_contacts(number: int) -> str:
+    USERS.show_contacts(number)
     return f'{"-" * 30}'
 
 
@@ -82,9 +92,10 @@ def show_commands() -> None:
     3 : to delete the phone  (input format: Name phone_to_delete),
     4 : to change phone  (input format: Name old_phone new_phone),    
     5 : to add birthday  (input format: Name day/month/year),
-    6 : to show contact  (input format: Name),
-    7 : to show all contacts,
-    8 : to close the app""")
+    6 : to see how many days to Name birthday (input format: Name)
+    7 : to show contact  (input format: Name),
+    8 : to show all contacts (N - numbers of contacts you want to see),
+    9 : to close the app""")
 
 
 COMMANDS = {
@@ -94,9 +105,10 @@ COMMANDS = {
     '3': delete_phone,
     '4': change_phone,
     '5': add_birthday,
-    '6': show_contact,
-    '7': show_all,
-    '8': close,
+    '6': days_to_birthday,
+    '7': show_contact,
+    '8': show_contacts,
+    '9': close,
 }
 
 
@@ -108,8 +120,9 @@ def get_user_input(user_command: str) -> str:
         user_input = input('Enter the name and the phones, please: ')
     elif user_command == '5':
         user_input = input('Enter the name and birthday: ')
-    elif user_command == '6':
+    elif user_command == ['6', '7']:
         user_input = input('Enter the name: ')
+    elif user_command == '8': user_input = int(input('Enter the number of contacts you want to see: '))
     return user_input
 
 @input_error
@@ -120,8 +133,12 @@ def main() -> None:
         if user_command in COMMANDS:
             if user_command in ['0', '7']:
                 COMMANDS[user_command](); continue
+            if user_command == '9':
+                COMMANDS['9'](); break
             if user_command == '8':
-                COMMANDS['8'](); break
+                user_input = get_user_input(user_command)
+                COMMANDS[user_command](user_input)
+                continue
             user_input = get_user_input(user_command)
             input_name, *input_phone = re.split(r'(?=\s[\+0-9])', user_input)
             if input_phone:
@@ -136,3 +153,4 @@ def main() -> None:
 if __name__ == '__main__':
     show_commands()
     main()
+

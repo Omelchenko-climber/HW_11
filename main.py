@@ -53,14 +53,15 @@ def delete_phone(user_name: str, user_phones: str) -> str:
     record.delete_number(user_phones)
     return f'Phone number {user_phones} has just been deleted from contact {user_name}.'
 
-def add_birthday(name: str, date: str) -> str:
-    if re.match(r"^\d{2}\/\d{2}\/\d{4}$", date):
-        birthday = Birthday(name, date)
+def add_birthday(user_name: str, user_date: str) -> str:
+    name = Name(user_name)
+    if re.match(r"^\d{2}\/\d{2}\/\d{4}$", user_date):
+        birthday = Birthday(name, user_date)
     else: return 'Check your input and try again, please.'
 
 
-def days_to_birthday(name: str) -> None:
-    name = Phone(name)
+def days_to_birthday(user_input: str) -> str:
+    name = Phone(user_input)
     record = Record(name)
     return record.days_to_birthday()
 
@@ -94,7 +95,7 @@ def show_commands() -> None:
     5 : to add birthday  (input format: Name day/month/year),
     6 : to see how many days to Name birthday (input format: Name)
     7 : to show contact  (input format: Name),
-    8 : to show all contacts (N - numbers of contacts you want to see),
+    8 : to show contacts (input format: name and N - numbers of contacts you want to see),
     9 : to close the app""")
 
 

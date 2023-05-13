@@ -26,7 +26,7 @@ class Name(Field):
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-        return super().__new__(cls)
+        return cls.__instance
 
     def __del__(self):
         Name.__instance = None
@@ -74,7 +74,7 @@ class Birthday(Field):
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-        return super().__new__(cls)
+        return cls.__instance
 
     def __del__(self):
         Birthday.__instance = None
@@ -135,7 +135,7 @@ class Record:
         if self.birthday:
             print(f'{self.birthday}')
         else:
-            return None
+            return f'Not defined yet.'
 
     def get_phone(self, inx) -> list:
         return self.phones[inx - 1]
@@ -155,7 +155,7 @@ class Record:
         return self.name.value
 
     def __str__(self) -> str:
-        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.birthday}"
+        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.show_birthday()}"
 
     def __repr__(self) -> str:
         return f"Record({self.name!r}: {self.phones!r}, {self.birthday!r})"
@@ -167,13 +167,16 @@ class AddressBook(UserDict):
         if record is not None:
             self.add_contact(record)
 
+    def get_phones(self, name: str) -> None:
+        return str(self.data[name])
+
     def add_contact(self, record: Record) -> None:
         self.data[record.get_name()] = record
 
     def show_contacts(self, how_many: int) -> None:
         count = 1
-        for name, record in self.data.items():
-            line = f'{name}: {record.show_phones()}, {record.show_birthday()}'
+        for name in self.data.keys():
+            line = f'{self.get_phones(name)}'
             yield line
             if count >= how_many: break
             count += 1
@@ -182,6 +185,3 @@ class AddressBook(UserDict):
         for name, record in self.data.items():
             print(f'{name}:')
             record.show_birthday()
-
-    def get_phones(self, name: str) -> None:
-        return self.data[name]

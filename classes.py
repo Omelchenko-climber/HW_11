@@ -21,16 +21,6 @@ class Field:
 
 
 class Name(Field):
-    __instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-        return cls.__instance
-
-    def __del__(self):
-        Name.__instance = None
-
     def __init__(self, value: str) -> None:
         super().__init__(value)
 
@@ -69,16 +59,6 @@ class Phone(Field):
 
 
 class Birthday(Field):
-    __instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-        return cls.__instance
-
-    def __del__(self):
-        Birthday.__instance = None
-
     def __init__(self, value: str) -> None:
         super().__init__(value)
 
@@ -105,12 +85,21 @@ class Record:
         self.phones = []
         if phone is not None:
             self.add_phone(phone)
+        if birthday is None:
+            self.birthday = f'Birthday for contact {self.name} is not defined yet .'
         self.birthday = birthday
 
     def add_phone(self, phone: Phone | str) -> None:
         if isinstance(phone, str):
             phone = self.create_phone(phone)
         self.phones.append(phone)
+
+    def add_birthday(self, birthday: Birthday | str):
+        if self.birthday is None:
+            self.birthday = birthday
+            return f'Add birthday record {birthday} to contact {self.name}.'
+        else:
+            return f'Contact {self.name} has already had birthday record.'
 
     def create_phone(self, phone: str) -> Phone:
         return Phone(phone)
@@ -135,7 +124,7 @@ class Record:
         if self.birthday:
             print(f'{self.birthday}')
         else:
-            return f'Not defined yet.'
+            print(f'Birthday for contact {self.name} is not defined yet .')
 
     def get_phone(self, inx) -> list:
         return self.phones[inx - 1]
@@ -149,16 +138,17 @@ class Record:
             else:
                 timedelta = birthday_date_next - date.today()
             return f'{self.name}`s next birthday will be in {str(timedelta).split(", ")[0]}.'
-        else: return f'For contact {self.name} you didn`t set birthday yet.'
+        else:
+            return f'For contact {self.name} you didn`t set birthday yet.'
 
     def get_name(self) -> str:
         return self.name.value
 
     def __str__(self) -> str:
-        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.show_birthday()}"
+        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.birthday}"
 
     def __repr__(self) -> str:
-        return f"Record({self.name!r}: {self.phones!r}, {self.birthday!r})"
+        return f"Record({self.name!r}: {self.phones!r}, {self.show_birthday()})"
 
 
 class AddressBook(UserDict):
@@ -167,21 +157,19 @@ class AddressBook(UserDict):
         if record is not None:
             self.add_contact(record)
 
-    def get_phones(self, name: str) -> None:
-        return str(self.data[name])
+    def get_phones(self, name: str) -> str:
+        return self.data[name]
 
     def add_contact(self, record: Record) -> None:
         self.data[record.get_name()] = record
 
     def show_contacts(self, how_many: int) -> None:
         count = 1
-        for name in self.data.keys():
-            line = f'{self.get_phones(name)}'
-            yield line
-            if count >= how_many: break
-            count += 1
+        if self.data:
+            for name in self.data.keys():
+                yield f'{self.get_phones(name)}'
+                if count >= how_many: break
+                count += 1
+        else:
+            print("You haven't any contacts yet.")
 
-    def show_birthday(self) -> None:
-        for name, record in self.data.items():
-            print(f'{name}:')
-            record.show_birthday()

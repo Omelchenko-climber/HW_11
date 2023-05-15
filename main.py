@@ -23,24 +23,24 @@ def input_error(func):
 
 
 @input_error
-def add_contact(user_name: str, user_phones: str) -> str:
+def add_contact(user_name: str, user_phones: str) -> str:       # Приймає ім'я та один номер телефону
     name = Name(user_name)
-    phone = Phone(user_phones)
+    phone = Phone(user_phones.split()[0])
     record = Record(name, phone)
     USERS.add_contact(record)
-    return f'Contact {user_name} with phone number {user_phones} has been added.'
+    return f'Contact {user_name} with phone number {user_phones.split()[0]} has been added.'
 
 
 @input_error
-def add_phone(user_name: str, user_phones: str) -> str:
+def add_phone(user_name: str, user_phones: str) -> str:         # Приймає ім'я та один номер телефону
     record = USERS.get_phones(user_name)
-    phone = Phone(user_phones)
+    phone = Phone(user_phones.split()[0])
     record.add_phone(phone)
-    return f'Phone number {user_name} has just been added to contact {user_name}'
+    return f'Phone number {user_phones.split()[0]} has just been added to contact {user_name}'
 
 
 @input_error
-def change_phone(user_name: str, user_phones: str) -> str:
+def change_phone(user_name: str, user_phones: str) -> str:          # Приймає ім'я, старий номер телефону та новий
     old_phone, new_phone = user_phones.split()
     record = USERS.get_phones(user_name)
     record.swap_number(old_phone, new_phone)
@@ -48,13 +48,13 @@ def change_phone(user_name: str, user_phones: str) -> str:
 
 
 @input_error
-def delete_phone(user_name: str, user_phones: str) -> str:
+def delete_phone(user_name: str, user_phones: str) -> str:          # Приймає ім'я та номер телефону, яки' треба видалити
     record = USERS.get_phones(user_name)
-    record.delete_number(user_phones)
-    return f'Phone number {user_phones} has just been deleted from contact {user_name}.'
+    record.delete_number(user_phones.split()[0])
+    return f'Phone number {user_phones.split()[0]} has just been deleted from contact {user_name}.'
 
 
-def add_birthday(user_name: str, user_date: str) -> str:
+def add_birthday(user_name: str, user_date: str) -> str:        # Приймає ім'я та дату 11/11/1111
     if re.match(r"^\d{2}\/\d{2}\/\d{4}$", user_date):
         birthday = Birthday(user_date)
         record = USERS.get_phones(user_name)
@@ -62,20 +62,21 @@ def add_birthday(user_name: str, user_date: str) -> str:
     else: return 'Check your input and try again, please.'
 
 
-def days_to_birthday(user_name: str) -> str:
+def days_to_birthday(user_name: str) -> str:                # Приймає ім'я
     record = USERS.get_phones(user_name)
-    return record.days_to_birthday()
+    return f'{record.days_to_birthday()}'
 
 
 @input_error
-def show_contact(user_name: str) -> str:
+def show_contact(user_name: str) -> str:                    # Приймає ім'я контакту
     print(USERS.get_phones(user_name))
     return f'{"-" * 30}'
 
 
 @input_error
-def show_contacts(number=1) -> str:
-    print(*USERS.show_contacts(number))
+def show_contacts(number=1) -> str:                         # Приймає число, кількість строк для виводу
+    for line in USERS.show_contacts(number):
+        print(line)
     return f'{"-" * 30}'
 
 
@@ -138,12 +139,15 @@ def main() -> None:
                 COMMANDS['9'](); break
             if user_command in ['6', '7', '8']:
                 user_input = get_user_input(user_command)
+                if isinstance(user_input, str):
+                    print(COMMANDS[user_command](user_input.capitalize()))
+                    continue
                 print(COMMANDS[user_command](user_input))
                 continue
             user_input = get_user_input(user_command)
             input_name, *input_phone = re.split(r'(?=\s[\+0-9])', user_input)
             if input_phone:
-                phones = input_phone[0].strip()
+                phones = ' '.join([number.strip() for number in input_phone])
                 print(COMMANDS[user_command](input_name.capitalize(), phones))
             else:
                 print(COMMANDS[user_command](input_name.capitalize()))

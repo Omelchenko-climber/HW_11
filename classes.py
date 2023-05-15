@@ -29,7 +29,7 @@ class Name(Field):
         return self.__value
 
     @Field.value.setter
-    def value(self, value):
+    def value(self, value):                      # Перевіряє правильність введеного ім'я, від 2 літер та тільки літери
         if re.match(r"^[a-zA-Z]{3,}$", value):
             Field.value.fset(self, value)
         else:
@@ -48,7 +48,7 @@ class Phone(Field):
         return self.__value
 
     @Field.value.setter
-    def value(self, value):
+    def value(self, value):                             # Перевіряє правильність введеного номера
         if re.match(r"\b\d{10}\b|\+?\d{12}\b", value):
             Field.value.fset(self, value)
         else:
@@ -67,10 +67,10 @@ class Birthday(Field):
         return self.__value
 
     @Field.value.setter
-    def value(self, value):
+    def value(self, value):                         # Перевіряє правильність введеної дати, між 100 та 6 років від сучасної
         curr_date = datetime.today().date()
         birthday_date = datetime.strptime(value, '%d/%m/%Y').date()
-        if curr_date.replace(year=curr_date.year - 100) <= birthday_date < curr_date.replace(year=curr_date.year - 8):
+        if curr_date.replace(year=curr_date.year - 100) <= birthday_date < curr_date.replace(year=curr_date.year - 6):
             Field.value.fset(self, value)
         else:
             raise ValueError('Incorrect birthday input, check it and try again, please!')
@@ -85,8 +85,6 @@ class Record:
         self.phones = []
         if phone is not None:
             self.add_phone(phone)
-        if birthday is None:
-            self.birthday = f'Birthday for contact {self.name} is not defined yet .'
         self.birthday = birthday
 
     def add_phone(self, phone: Phone | str) -> None:
@@ -120,11 +118,11 @@ class Record:
         for index, phone in enumerate(self.phones, 1):
             print(f'{index}: {phone.value}')
 
-    def show_birthday(self) -> None:
+    def show_birthday(self) -> str:
         if self.birthday:
-            print(f'{self.birthday}')
+            return f'{self.birthday}'
         else:
-            print(f'Birthday for contact {self.name} is not defined yet .')
+            return f'not define yet.'
 
     def get_phone(self, inx) -> list:
         return self.phones[inx - 1]
@@ -133,10 +131,10 @@ class Record:
         if self.birthday:
             date_of_birthday = datetime.strptime(str(self.birthday), '%d/%m/%Y').date()
             birthday_date_next = date_of_birthday.replace(year=date.today().year + 1)
-            if date_of_birthday.replace(year=date.today().year + 1) < date.today():
+            if date_of_birthday.replace(year=date.today().year) < date.today():
                 timedelta = birthday_date_next - date.today()
             else:
-                timedelta = birthday_date_next - date.today()
+                timedelta = date_of_birthday.replace(year=date.today().year) - date.today()
             return f'{self.name}`s next birthday will be in {str(timedelta).split(", ")[0]}.'
         else:
             return f'For contact {self.name} you didn`t set birthday yet.'
@@ -145,7 +143,7 @@ class Record:
         return self.name.value
 
     def __str__(self) -> str:
-        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.birthday}"
+        return f"name: {self.name}, phones: {', '.join(str(number) for number in self.phones)}, birthday: {self.show_birthday()}"
 
     def __repr__(self) -> str:
         return f"Record({self.name!r}: {self.phones!r}, {self.show_birthday()})"
@@ -163,11 +161,12 @@ class AddressBook(UserDict):
     def add_contact(self, record: Record) -> None:
         self.data[record.get_name()] = record
 
-    def show_contacts(self, how_many: int) -> None:
+    def show_contacts(self, how_many: int) -> None:         #Генерує обмежену кількість строк
         count = 1
         if self.data:
             for name in self.data.keys():
-                yield f'{self.get_phones(name)}'
+                line = f'{self.get_phones(name)}'
+                yield line
                 if count >= how_many: break
                 count += 1
         else:

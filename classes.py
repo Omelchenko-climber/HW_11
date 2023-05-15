@@ -5,7 +5,6 @@ import re
 
 class Field:
     def __init__(self, value: str) -> None:
-        self.__value = None
         self.value = value
 
     @property
@@ -22,11 +21,7 @@ class Field:
 
 class Name(Field):
     def __init__(self, value: str) -> None:
-        super().__init__(value)
-
-    @property
-    def value(self):
-        return self.__value
+        self.value = value
 
     @Field.value.setter
     def value(self, value):                      # Перевіряє правильність введеного ім'я, від 2 літер та тільки літери
@@ -41,11 +36,7 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value: str) -> None:
-        super().__init__(value)
-
-    @property
-    def value(self):
-        return self.__value
+        self.value = value
 
     @Field.value.setter
     def value(self, value):                             # Перевіряє правильність введеного номера
@@ -60,11 +51,7 @@ class Phone(Field):
 
 class Birthday(Field):
     def __init__(self, value: str) -> None:
-        super().__init__(value)
-
-    @property
-    def value(self):
-        return self.__value
+        self.value = value
 
     @Field.value.setter
     def value(self, value):                         # Перевіряє правильність введеної дати, між 100 та 6 років від сучасної

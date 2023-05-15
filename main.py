@@ -57,9 +57,12 @@ def delete_phone(user_name: str, user_phones: str) -> str:          # Прийм
 def add_birthday(user_name: str, user_date: str) -> str:        # Приймає ім'я та дату 11/11/1111
     if re.match(r"^\d{2}\/\d{2}\/\d{4}$", user_date):
         birthday = Birthday(user_date)
-        record = USERS.get_phones(user_name)
-        return record.add_birthday(birthday)
-    else: return 'Check your input and try again, please.'
+        if isinstance(birthday, Birthday):
+            record = USERS.get_phones(user_name)
+            return record.add_birthday(birthday)
+        else: return 'Check your input and try again, please.'
+    else:
+        return 'Check your input and try again, please.'
 
 
 def days_to_birthday(user_name: str) -> str:                # Приймає ім'я
